@@ -8,12 +8,12 @@ pipeline {
         }
         stage('Compile') {
             steps {
-                echo 'Compile the source code' 
+                echo 'clone code' 
             }
         }
         stage('Security Check') {
             steps {
-                echo 'Run the security check against the application' 
+                echo 'Compile the source code' 
             }
         }
         stage('Run Unit Tests') {
