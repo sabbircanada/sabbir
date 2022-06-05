@@ -1,0 +1,60 @@
+pipeline {
+
+    agent any
+    
+    environment {
+            EXAMPLE_CREDS = credentials('69e2e86a-ecfe-4d50-adac-1cab09af0060')
+            }
+    
+ 	stages {
+        stage("clean artifacts") {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    
+                     sh " rm -r /var/jenkins_home/workspace/dev/artifact"
+                  
+                }                  
+                }   
+        }    
+        stage("clone code") {
+            steps {
+                script {
+                    git 'https://github.com/sabbircanada/sabbir.git';
+                    sh "ls -lart ./*"
+                    sh "git branch -a"
+                    sh "git checkout main"
+                   
+                }
+            }
+        }
+        
+        stage('artifacts'){
+           steps{
+              sh "ls -ll"
+              sh "pwd"
+              sh "ls -ll /var/jenkins_home/workspace"
+              sh "pwd"
+              sh "ls"
+              sh "mkdir /var/jenkins_home/workspace/artifact"
+              sh "ls -ll /var/jenkins_home/workspace"
+              sh "cp -r /var/jenkins_home/workspace/dev/* /var/jenkins_home/workspace/artifact/  "
+              sh "ls -ll /var/jenkins_home/workspace/artifact"
+              sh "mv /var/jenkins_home/workspace/artifact/ /var/jenkins_home/workspace/dev/ "
+              sh "ls -ll /var/jenkins_home/workspace/dev"
+              sh "ls -ll /var/jenkins_home/workspace/dev/artifact"
+              
+              sh "tar -zcvf artifact.tar.gz /var/jenkins_home/workspace/dev/artifact "
+              
+              sh "ls -ll /var/jenkins_home/workspace/dev/"
+              }
+           }    
+        stage("publish to nexus") {
+            steps {
+                script {
+                    sh"pwd"
+                   sh('curl -v -u jenkins-user:sabbir  --upload-file artifact.tar.gz  http://165.227.32.156:8081/repository/Maven-Nexus-Repo/var/jenkins_home/workspace/dev/artifact/artifact.tar.gz')                   
+               }
+            }
+	  }
+}
+}
